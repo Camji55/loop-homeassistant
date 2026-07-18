@@ -1,0 +1,11 @@
+{
+  "domain": "loop",
+  "name": "Loop",
+  "codeowners": ["@camji55"],
+  "config_flow": true,
+  "dependencies": ["webhook"],
+  "documentation": "https://github.com/Camji55/loop-homeassistant",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/Camji55/loop-homeassistant/issues",
+  "version": "0.2.0"
+}

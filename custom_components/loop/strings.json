@@ -1,0 +1,43 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Loop",
+        "description": "A webhook has been created for Loop.\n\nCopy this URL into the Home Assistant service settings in the Loop app:\n\n`{webhook_url}`\n\nPress Submit to finish."
+      }
+    },
+    "abort": {
+      "already_configured": "Loop is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "blood_glucose": { "name": "Blood glucose" },
+      "glucose_trend": { "name": "Glucose trend" },
+      "insulin_on_board": { "name": "Insulin on board" },
+      "carbs_on_board": { "name": "Carbs on board" },
+      "eventual_glucose": { "name": "Eventual glucose" },
+      "basal_rate": { "name": "Basal rate" },
+      "pump_reservoir": { "name": "Pump reservoir" },
+      "pump_battery": { "name": "Pump battery" },
+      "last_loop_completed": { "name": "Last loop completed" },
+      "last_carb_entry": { "name": "Last carb entry" },
+      "last_bolus": { "name": "Last bolus" },
+      "active_override": { "name": "Active override" },
+      "last_alert": { "name": "Last alert" },
+      "last_site_change": { "name": "Last site change" },
+      "last_reservoir_change": { "name": "Last reservoir change" },
+      "last_sensor_start": { "name": "Last sensor start" },
+      "scheduled_basal_rate": { "name": "Scheduled basal rate" },
+      "carb_ratio": { "name": "Carb ratio" },
+      "insulin_sensitivity": { "name": "Insulin sensitivity" },
+      "correction_range": { "name": "Correction range" },
+      "max_bolus": { "name": "Max bolus" },
+      "max_basal_rate": { "name": "Max basal rate" }
+    },
+    "binary_sensor": {
+      "closed_loop": { "name": "Closed loop" },
+      "pump_suspended": { "name": "Pump suspended" }
+    }
+  }
+}
