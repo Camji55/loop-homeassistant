@@ -13,7 +13,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import LoopData
-from .const import DOMAIN, SIGNAL_UPDATE
+from .const import DOMAIN, signal_update
 
 
 async def async_setup_entry(
@@ -53,19 +53,22 @@ class LoopBinarySensor(BinarySensorEntity):
     ) -> None:
         self._data = data
         self._key = key
+        self._entry_id = entry.entry_id
         self._attr_translation_key = translation_key
         self._attr_device_class = device_class
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="Loop",
+            name=entry.title or "Loop",
             manufacturer="LoopKit",
-            model="Loop iOS app",
+            model="AID app (HomeAssistantService)",
         )
 
     async def async_added_to_hass(self) -> None:
         self.async_on_remove(
-            async_dispatcher_connect(self.hass, SIGNAL_UPDATE, self._handle_update)
+            async_dispatcher_connect(
+                self.hass, signal_update(self._entry_id), self._handle_update
+            )
         )
 
     @callback

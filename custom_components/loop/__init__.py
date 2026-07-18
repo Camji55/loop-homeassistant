@@ -28,8 +28,9 @@ from .const import (
     KEY_OVERRIDE,
     KEY_PUMP_EVENTS,
     KEY_SETTINGS,
+    KEY_SOURCE,
     KEY_STATUS,
-    SIGNAL_UPDATE,
+    signal_update,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -98,9 +99,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     webhook.async_register(
         hass,
         DOMAIN,
-        "Loop",
+        entry.title or "Loop",
         entry.data[CONF_WEBHOOK_ID],
-        _make_webhook_handler(entry.entry_id),
+        _make_webhook_handler(entry),
         allowed_methods=["POST"],
     )
 
@@ -117,7 +118,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-def _make_webhook_handler(entry_id: str):
+def _make_webhook_handler(entry: ConfigEntry):
     """Create a webhook handler bound to a config entry."""
 
     async def handle_webhook(
@@ -132,23 +133,29 @@ def _make_webhook_handler(entry_id: str):
         if not isinstance(payload, dict):
             return web.Response(status=HTTPStatus.BAD_REQUEST)
 
-        _LOGGER.debug("Loop webhook payload: %s", payload)
+        _LOGGER.debug("Loop webhook payload (%s): %s", entry.title, payload)
 
-        data: LoopData = hass.data[DOMAIN][entry_id]
+        data: LoopData = hass.data[DOMAIN][entry.entry_id]
         data.update(payload)
 
-        # Notify entities, then fire a bus event for automations that want
-        # the raw payload (e.g. reacting to individual pump events).
-        async_dispatcher_send(hass, SIGNAL_UPDATE)
+        # The app's own name if it sends one; the entry title otherwise. Lets
+        # automations tell multiple AID instances (Loop, Trio, …) apart.
+        source = payload.get(KEY_SOURCE) or entry.title or "Loop"
+
+        # Notify this entry's entities, then fire a bus event for automations
+        # that want the raw payload (e.g. reacting to individual pump events).
+        async_dispatcher_send(hass, signal_update(entry.entry_id))
         hass.bus.async_fire(
             EVENT_DATA_RECEIVED,
             {
+                "entry_id": entry.entry_id,
+                "source": source,
                 "keys": sorted(payload.keys()),
                 "pump_events": payload.get(KEY_PUMP_EVENTS) or [],
             },
         )
         for alert in payload.get(KEY_ALERTS) or []:
-            hass.bus.async_fire(f"{DOMAIN}_alert", alert)
+            hass.bus.async_fire(f"{DOMAIN}_alert", {**alert, "source": source})
         return web.Response(status=HTTPStatus.OK)
 
     return handle_webhook
